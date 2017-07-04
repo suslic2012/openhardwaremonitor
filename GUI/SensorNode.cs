@@ -21,6 +21,7 @@ namespace OpenHardwareMonitor.GUI {
     private PersistentSettings settings;
     private UnitManager unitManager;
     private string format;
+    private string type;
     private bool plot = false;
     private Color? penColor = null;
 
@@ -42,18 +43,18 @@ namespace OpenHardwareMonitor.GUI {
       this.settings = settings;
       this.unitManager = unitManager;
       switch (sensor.SensorType) {
-        case SensorType.Voltage: format = "{0:F3} V"; break;
-        case SensorType.Clock: format = "{0:F0} MHz"; break;
-        case SensorType.Load: format = "{0:F1} %"; break;
-        case SensorType.Temperature: format = "{0:F1} °C"; break;
-        case SensorType.Fan: format = "{0:F0} RPM"; break;
-        case SensorType.Flow: format = "{0:F0} L/h"; break;
-        case SensorType.Control: format = "{0:F1} %"; break;
-        case SensorType.Level: format = "{0:F1} %"; break;
-        case SensorType.Power: format = "{0:F1} W"; break;
-        case SensorType.Data: format = "{0:F1} GB"; break;
-        case SensorType.SmallData: format = "{0:F1} MB"; break;
-        case SensorType.Factor: format = "{0:F3}"; break;
+        case SensorType.Voltage: format = "{0:F3} V"; type = "Voltage"; break;
+        case SensorType.Clock: format = "{0:F0} MHz"; type = "Clock";  break;
+        case SensorType.Load: format = "{0:F1} %"; type = "Load"; break;
+        case SensorType.Temperature: format = "{0:F1} °C"; type = "Temperature"; break;
+        case SensorType.Fan: format = "{0:F0} RPM"; type = "Fan"; break;
+        case SensorType.Flow: format = "{0:F0} L/h"; type = "Flow"; break;
+        case SensorType.Control: format = "{0:F1} %"; type = "Control"; break;
+        case SensorType.Level: format = "{0:F1} %"; type = "Level"; break;
+        case SensorType.Power: format = "{0:F1} W"; type = "Power"; break;
+        case SensorType.Data: format = "{0:F1} GB"; type = "Data"; break;
+        case SensorType.SmallData: format = "{0:F1} MB"; type = "SmallData"; break;
+        case SensorType.Factor: format = "{0:F3}"; type = "Factor"; break;
       }
 
       bool hidden = settings.GetValue(new Identifier(sensor.Identifier, 
@@ -113,6 +114,10 @@ namespace OpenHardwareMonitor.GUI {
 
     public ISensor Sensor {
       get { return sensor; }
+    }
+
+    public string Type {
+       get { return type; }
     }
 
     public string Value {

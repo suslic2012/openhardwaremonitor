@@ -19,6 +19,7 @@ namespace OpenHardwareMonitor.GUI {
     private PersistentSettings settings;
     private UnitManager unitManager;
     private IHardware hardware;
+    private string type;
 
     private List<TypeNode> typeNodes = new List<TypeNode>();
 
@@ -29,6 +30,18 @@ namespace OpenHardwareMonitor.GUI {
       this.unitManager = unitManager;
       this.hardware = hardware;
       this.Image = HardwareTypeImage.Instance.GetImage(hardware.HardwareType);
+      
+      switch(hardware.HardwareType) {
+                case HardwareType.Mainboard: type = "Mainboard";break;
+                case HardwareType.SuperIO: type = "SuperIO";break;
+                case HardwareType.CPU: type = "CPU";break;
+                case HardwareType.RAM: type = "RAM";break;
+                case HardwareType.GpuNvidia: type = "GpuNvidia";break;
+                case HardwareType.GpuAti: type = "GpuAti";break;
+                case HardwareType.TBalancer: type = "TBalancer";break;
+                case HardwareType.Heatmaster: type = "Heatmaster";break;
+                case HardwareType.HDD: type = "HDD";break;
+            }
 
       foreach (SensorType sensorType in Enum.GetValues(typeof(SensorType)))
         typeNodes.Add(new TypeNode(sensorType));
@@ -44,6 +57,11 @@ namespace OpenHardwareMonitor.GUI {
       get { return hardware.Name; }
       set { hardware.Name = value; }
     }
+    
+    public string Type
+        {
+            get { return type; }
+        }
 
     public IHardware Hardware {
       get { return hardware; }

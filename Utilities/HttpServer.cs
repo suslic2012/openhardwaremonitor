@@ -24,16 +24,13 @@ namespace OpenHardwareMonitor.Utilities {
 
   public class HttpServer {
     private HttpListener listener;
-    private int listenerPort, nodeCount;
+    private int listenerPort;
     private Thread listenerThread;
     private Node root;
 
     public HttpServer(Node node, int port) {
       root = node;
       listenerPort = port;
-
-      //JSON node count. 
-      nodeCount = 0;
 
       try {
         listener = new HttpListener();
@@ -206,15 +203,7 @@ namespace OpenHardwareMonitor.Utilities {
 
     private void SendJSON(HttpListenerResponse response) {
 
-      string JSON = "{\"id\": 0, \"Text\": \"Sensor\", \"Children\": [";
-      nodeCount = 1;
-      JSON += GenerateJSON(root);
-      JSON += "]";
-      JSON += ", \"Min\": \"Min\"";
-      JSON += ", \"Value\": \"Value\"";
-      JSON += ", \"Max\": \"Max\"";
-      JSON += ", \"ImageURL\": \"\"";
-      JSON += "}";
+      string JSON = GenerateJSON(root);
 
       var responseContent = JSON;
       byte[] buffer = Encoding.UTF8.GetBytes(responseContent);
@@ -235,41 +224,49 @@ namespace OpenHardwareMonitor.Utilities {
     }
 
     private string GenerateJSON(Node n) {
-      string JSON = "{\"id\": " + nodeCount + ", \"Text\": \"" + n.Text 
-        + "\", \"Children\": [";
-      nodeCount++;
+            string JSON = "{\"Name\": \"" + n.Text + "\"";
+            if (n is SensorNode)
+            {
+                JSON += ", \"id\": \"" + ((SensorNode)n).Sensor.Identifier + "\"";
+                JSON += ", \"Min\": \"" + ((SensorNode)n).Sensor.Min.ToString() + "\"";
+                JSON += ", \"Value\": \"" + ((SensorNode)n).Sensor.Value.ToString() + "\"";
+                JSON += ", \"Max\": \"" + ((SensorNode)n).Sensor.Max.ToString() + "\"";
+                JSON += ", \"Type\": \"" + ((SensorNode)n).Type + "\"";
+                JSON += ", \"Class\": \"Sensor\"";
+            }
+            else if (n is HardwareNode)
+            {
+                JSON += ", \"id\": \"" + ((HardwareNode)n).Hardware.Identifier + "\"";
+                JSON += ", \"Type\": \"" + ((HardwareNode)n).Type + "\"";
+                JSON += ", \"Class\": \"Hardware\"";
+            }
+            else if (n is TypeNode)
+            {
+                if (n.Parent is HardwareNode)
+                {
+                    JSON += ", \"id\": \"" + ((HardwareNode)n.Parent).Hardware.Identifier + "/" + n.Text + "\"";
+                }
+                else
+                {
+                    JSON += ", \"id\": \"invalid\"";
+                }
+                JSON += ", \"Class\": \"Type\"";
+            }
+            else
+            {
+                JSON += ", \"id\": \"invalid\"";
+                JSON += ", \"Class\": \"Unknown\"";
+            }
+
+            JSON += ", \"Children\": [";
 
       foreach (Node child in n.Nodes)
         JSON += GenerateJSON(child) + ", ";
+
       if (JSON.EndsWith(", "))
         JSON = JSON.Remove(JSON.LastIndexOf(","));
-      JSON += "]";
 
-      if (n is SensorNode) {
-        JSON += ", \"Min\": \"" + ((SensorNode)n).Min + "\"";
-        JSON += ", \"Value\": \"" + ((SensorNode)n).Value + "\"";
-        JSON += ", \"Max\": \"" + ((SensorNode)n).Max + "\"";
-        JSON += ", \"ImageURL\": \"images/transparent.png\"";
-      } else if (n is HardwareNode) {
-        JSON += ", \"Min\": \"\"";
-        JSON += ", \"Value\": \"\"";
-        JSON += ", \"Max\": \"\"";
-        JSON += ", \"ImageURL\": \"images_icon/" + 
-          GetHardwareImageFile((HardwareNode)n) + "\"";
-      } else if (n is TypeNode) {
-        JSON += ", \"Min\": \"\"";
-        JSON += ", \"Value\": \"\"";
-        JSON += ", \"Max\": \"\"";
-        JSON += ", \"ImageURL\": \"images_icon/" + 
-          GetTypeImageFile((TypeNode)n) + "\"";
-      } else {
-        JSON += ", \"Min\": \"\"";
-        JSON += ", \"Value\": \"\"";
-        JSON += ", \"Max\": \"\"";
-        JSON += ", \"ImageURL\": \"images_icon/computer.png\"";
-      }
-
-      JSON += "}";
+      JSON += "]}";
       return JSON;
     }
 
